@@ -1,0 +1,17 @@
+{
+  "_comment": "run 归档模板：cost.json（EXAMPLE 值）。全本地部署，成本=时长+步数+调用次数",
+  "run_id": "EXAMPLE run_20260315_001",
+  "wall_time_seconds": 6.1,
+  "breakdown": {
+    "decode_s": 1.4,
+    "index_s": 1.7,
+    "locate_extract_s": 0.05,
+    "llm_s": 2.4,
+    "verify_gates_s": 0.05
+  },
+  "steps_used": 4,
+  "budget": 50,
+  "llm_calls": 1,
+  "llm_tokens": {"prompt": 3200, "completion": 620},
+  "electricity_cost_estimate_cny": 0.01
+}

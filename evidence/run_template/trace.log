@@ -1,0 +1,17 @@
+# run 归档模板：trace.log（EXAMPLE 行，评测脚本运行时自动生成）
+# 格式：<时间> [<层>] <事件> | key=value
+[10:00:00.102] [PreGate] whitelist_check | target=a1b2c3d4e5f6 result=PASS
+[10:00:00.104] [PreGate] intent_filter | tier=L0 result=PASS
+[10:00:00.105] [PreGate] intent_filter | tier=L1 result=PASS
+[10:00:00.106] [PreGate] budget_check | used=0/50 result=PASS
+[10:00:00.110] [Router] analysis_type | source=explicit value=FUNCTION_LOGIC
+[10:00:00.112] [Router] skill_select | target_type=APK skill=skill_apk
+[10:00:01.500] [Skill] stage1_decode | tool=apktool-2.9.3 duration=1.38s status=OK
+[10:00:03.200] [Skill] stage2_index | classes=182 methods=964 strings=2310 status=OK
+[10:00:03.400] [Skill] stage3_locate | strategy=string_lookup candidates=2
+[10:00:03.450] [Skill] stage4_extract | fragments=2 max_lines=49
+[10:00:05.900] [Skill] stage5_llm | model=qwen2.5-coder:14b duration=2.4s injection_suspected=false
+[10:00:06.100] [Skill] stage6_verify | refs=3 verified=3 status=PASS
+[10:00:06.120] [PostGate] payload_scan | result=CLEAN
+[10:00:06.121] [PostGate] confidence_check | value=0.86 threshold=0.75 result=PASS
+[10:00:06.122] [PostGate] final_status | CONFIRMED review_required=false

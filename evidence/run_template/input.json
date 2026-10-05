@@ -1,0 +1,18 @@
+{
+  "_comment": "run 归档模板：input.json（EXAMPLE 值，评测脚本运行时自动生成）",
+  "run_id": "EXAMPLE run_20260315_001",
+  "timestamp": "EXAMPLE 2026-03-15T10:00:00+08:00",
+  "target": {
+    "target_id": "EXAMPLE a1b2c3d4e5f6",
+    "target_type": "APK",
+    "sample_name": "EXAMPLE teach01",
+    "whitelisted": true
+  },
+  "request": {
+    "analysis_type": "EXAMPLE FUNCTION_LOGIC",
+    "query": "EXAMPLE 登录时口令是怎么校验的？",
+    "budget": 50,
+    "session_id": "EXAMPLE sess_0001",
+    "authorization_ack": true
+  }
+}

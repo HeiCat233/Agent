@@ -1,0 +1,29 @@
+{
+  "_comment": "版本清单模板：每次评测前复制填写，锁定工具与模型版本（EXAMPLE 值，运行时替换）",
+  "manifest_version": "EXAMPLE-0.1",
+  "created_at": "EXAMPLE 2026-10-15T10:00:00+08:00",
+  "code": {
+    "repo_commit": "EXAMPLE <git sha>",
+    "agent_version": "0.1.0",
+    "skill_apk_version": "0.1.0"
+  },
+  "tools": {
+    "apktool": "EXAMPLE 2.9.3",
+    "python": "EXAMPLE 3.11.x",
+    "docker_image": "EXAMPLE apktool-sandbox:1.0"
+  },
+  "llm": {
+    "provider": "local-ollama",
+    "model": "EXAMPLE qwen2.5-coder:14b",
+    "quantization": "EXAMPLE Q4_K_M",
+    "temperature": 0.2,
+    "selected_by": "EXAMPLE <决策人>（见 design/ADR-003 选择记录）"
+  },
+  "dataset": {
+    "teaching_apks": ["EXAMPLE teach01", "EXAMPLE teach02", "EXAMPLE teach03", "EXAMPLE teach04"],
+    "foss_apks": ["EXAMPLE <name+version>"],
+    "obfuscated_variant": "EXAMPLE teach01-proguard",
+    "positive_queries": 50,
+    "negative_queries": 50
+  }
+}

@@ -1,0 +1,5 @@
+0.2.0
+# 格式：主.次.补丁
+# 0.1.0 = 骨架阶段（方案与模板就绪，Python 代码骨架）
+# 0.2.0 = 技术栈切换 Java/Spring Boot 3（ADR-008）+ 部署隔离评估（ADR-007）
+# 版本变更须同步更新 evidence/version_manifest.json
