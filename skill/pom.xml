@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- skill-apk：A组差异化实现（ADR-006 可插拔接口；ADR-008 baksmali 原生库） -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.webagent</groupId>
+    <artifactId>webagent-parent</artifactId>
+    <version>0.2.0</version>
+  </parent>
+
+  <artifactId>skill-apk</artifactId>
+
+  <dependencies>
+    <!-- 共享契约：只依赖 agent 的接口，反向不可（ADR-006） -->
+    <dependency>
+      <groupId>com.webagent</groupId>
+      <artifactId>agent</artifactId>
+      <version>0.2.0</version>
+    </dependency>
+    <!-- TODO Phase 3：Stage 2/4 用 baksmali 原生库解析 smali（ADR-008 加分项）
+    <dependency>
+      <groupId>org.smali</groupId>
+      <artifactId>baksmali</artifactId>
+      <version>2.5.2</version>
+    </dependency>
+    -->
+  </dependencies>
+</project>

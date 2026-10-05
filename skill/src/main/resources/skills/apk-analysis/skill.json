@@ -1,0 +1,11 @@
+{
+  "_comment": "ADR-010 声明式注册表示例：SkillRegistry 启动扫描 skills/ 目录读取本文件",
+  "key": "apk-analysis",
+  "label": "APK 结构与逻辑分析（A组）",
+  "targetTypes": ["APK"],
+  "entryClass": "com.webagent.skill.apk.ApkAnalysisSkill",
+  "signals": ["目录结构", "组件", "登录逻辑", "函数", "方法", "调用关系", "调用图", "字符串", "常量", "注释树", "目录重写"],
+  "analysisTypes": ["DIRECTORY_STRUCTURE", "COMPONENT_LIST", "FUNCTION_LOGIC", "CALL_GRAPH", "STRING_SEARCH", "DIRECTORY_REWRITE"],
+  "formalValidation": ["R01", "R02", "R05", "R08"],
+  "boundaries": "只读分析；描述性输出；每条结论必须带可回验的 file:line 引用；不输出可运行攻击内容"
+}

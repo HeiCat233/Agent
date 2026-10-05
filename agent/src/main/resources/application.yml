@@ -1,0 +1,31 @@
+# 调试默认走 GLM 云端（ADR-009）；正式/离线可切 local-ollama
+webagent:
+  llm:
+    channel: cloud-glm
+    cloud-glm:
+      base-url: https://open.bigmodel.cn/api/paas/v4
+      model: glm-4-flash            # 以 ADR-003 选择记录为准
+      # key 注入方式（二选一，绝不写入本文件入库）：
+      #   1) 环境变量 ZHIPUAI_API_KEY
+      #   2) application-local.yml（已被 .gitignore 排除）
+    ollama:
+      base-url: http://localhost:11434
+      model: qwen2.5-coder:7b
+      options:
+        temperature: 0.2
+        num-ctx: 8192
+    timeout-seconds: 60
+    retry: 1
+  confidence:
+    confirmed-threshold: 0.75
+    uncertain-threshold: 0.40
+  intent-filter:
+    l2-enabled: false
+  sandbox:
+    image: apktool-sandbox:1.0
+    timeout-seconds: 120
+    memory: 2g
+    cpus: 2
+  skills-dir: skills               # ADR-010：声明式 Skill 目录（启动扫描）
+server:
+  port: 8000
