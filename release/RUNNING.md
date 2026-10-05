@@ -55,13 +55,31 @@ ollama pull qwen2.5-coder:7b    # 本机（8GB显存）正式通道，约4.7G，
 # 切换：application.yml 中 webagent.llm.channel=local-ollama
 ```
 
-## 3. 后端启动
+## 3. 本机启动（已验证路径，2026-10-05）
 
-```bash
-# EXAMPLE（实现后补充真实步骤）：Maven 多模块（ADR-008）
-mvn -pl agent -am spring-boot:run        # 或 IDEA 打开根 pom 运行 AgentApplication
-mvn test                                  # 全模块测试
+环境（绿色版，位于 D:\dev，不占 C 盘）：JDK 17.0.2、Maven 3.9.9、apktool（待装，见下）。
+
+```bat
+:: ① 打开 cmd，执行环境脚本（或手动 set JAVA_HOME/PATH）
+D:\develop\git\webAgent\env.bat
+
+:: ② 构建（首次约几分钟，依赖仓库在 D:\dev\m2）
+mvn install -DskipTests -Dmaven.repo.local=D:\dev\m2
+
+:: ③ 启动（agent fat 依赖 + skill 插件 jar 组合 classpath）
+java -cp "agent\target\agent-0.2.0.jar;skill\target\skill-apk-0.2.0.jar;agent\target\deps\*" com.webagent.core.AgentApplication
+
+:: ④ 浏览器打开 web\debug-page.html 冒烟（或 curl，见第 6 节）
 ```
+
+LLM 通道：`application.yml` 的 `webagent.llm.channel` —— `mock`（默认，无 key 可跑）/
+`cloud-glm`（设 ZHIPUAI_API_KEY 后真连，见 2.0 节）/ `local-ollama`（正式）。
+
+apktool（Stage 1 解码需要）：从官方 release 手动下载
+`https://github.com/iBotPeaches/Apktool/releases` 的 `apktool_2.9.3.jar`
+（或 bitbucket.org/iBotPeaches/apktool 页面入口），放到 `D:\dev\apktool\apktool.jar`。
+缺失时 Stage 1 走诚实失败路径（UNCERTAIN/TOOL_FAILURE，不编造结论）——系统其余功能
+（白名单/意图拦截/审计/目录树外的确定性查询）不受影响。
 
 ## 4. 沙箱镜像
 

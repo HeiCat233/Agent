@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * 部署形态（ADR-007）：本进程为可信面，仅监听本机；不可信面（apktool 解析）
  * 由 Docker 沙箱隔离（application.yml: webagent.sandbox）。
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.webagent")   // 含 skill 模块的 com.webagent.skill.*
 public class AgentApplication {
     public static void main(String[] args) {
         SpringApplication.run(AgentApplication.class, args);

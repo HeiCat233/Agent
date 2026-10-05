@@ -1,0 +1,11 @@
+{
+  "_comment": "B组声明示例（ADR-010 契约一致性演示；entryClass 由 B组实现后填入）",
+  "key": "miniprogram-analysis",
+  "label": "小程序结构与逻辑分析（B组）",
+  "targetTypes": ["MINIPROGRAM"],
+  "entryClass": "com.webagent.skill.miniprogram.MiniprogramAnalysisSkill",
+  "signals": ["页面", "pages", "支付", "登录", "存储", "网络请求", "路由", "小程序"],
+  "analysisTypes": ["DIRECTORY_STRUCTURE", "COMPONENT_LIST", "FUNCTION_LOGIC", "CALL_GRAPH", "STRING_SEARCH", "DIRECTORY_REWRITE"],
+  "formalValidation": ["R01", "R02", "R05", "R08"],
+  "boundaries": "只读分析；描述性输出；每条结论必须带可回验的 file:line 引用；不输出可运行攻击内容"
+}

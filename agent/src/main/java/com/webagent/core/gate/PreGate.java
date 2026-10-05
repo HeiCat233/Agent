@@ -1,54 +1,80 @@
 package com.webagent.core.gate;
 
 import com.webagent.core.Contracts;
+import com.webagent.core.store.SessionStore;
+import com.webagent.core.store.WhitelistStore;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 /**
- * PreGate 入口关卡 —— 纯硬编码，不依赖 LLM（ADR-001/002）。
- * 任何代码路径不得绕过 PreGate（代码评审红线，见 status_and_permissions.md）。
+ * PreGate 入口关卡（ADR-001）：P1 白名单 P2 授权声明 P3/P4 意图过滤 P5 预算 P6 会话冻结。
+ * 纯硬编码，不依赖 LLM；任何代码路径不得绕过（代码评审红线）。
  */
 @Component
 public class PreGate {
 
-    private final IntentFilter intentFilter = new IntentFilter();
-    private final Budget budget = new Budget();
-    private final java.util.Set<String> whitelist = new java.util.HashSet<>();
+    private final WhitelistStore whitelist;
+    private final SessionStore sessions;
+    private final IntentFilter intentFilter;
 
-    /** P1：target_id 规范化（trim/小写/去路径分隔），防 T3 白名单绕过。 */
-    static String normalize(String targetId) {
-        return targetId.trim().toLowerCase().replace("\\", "").replace("/", "");
+    public PreGate(WhitelistStore whitelist, SessionStore sessions,
+                   @Value("${webagent.intent-filter.l2-enabled:false}") boolean l2Enabled) {
+        this.whitelist = whitelist;
+        this.sessions = sessions;
+        this.intentFilter = new IntentFilter(l2Enabled);
     }
 
-    public void register(String targetId) {
-        whitelist.add(normalize(targetId));
+    /** 供 REST /targets 调用：注册即入白名单（P2 在此强制）。 */
+    public String registerTarget(String name, String sourceTag, String apkPath, boolean authorized) {
+        return whitelist.register(name, sourceTag, apkPath, authorized);
     }
 
     public Contracts.GateResult check(Contracts.AnalysisRequest req) {
-        String target = normalize(req.targetId());
-        if (!whitelist.contains(target)) {                                     // P1
-            return Contracts.GateResult.reject(Contracts.Status.REJECTED,
-                    Contracts.ReasonCode.UNAUTHORIZED_TARGET, "目标未在授权学习白名单内");
-        }
-        if (!req.authorizationAck()) {                                         // P2
-            return Contracts.GateResult.reject(Contracts.Status.REJECTED,
-                    Contracts.ReasonCode.AUTH_MISSING, "缺少授权声明");
-        }
-        if (req.budget() < Contracts.MIN_BUDGET || req.budget() > Contracts.MAX_BUDGET) { // P5
-            return Contracts.GateResult.reject(Contracts.Status.REJECTED,
-                    Contracts.ReasonCode.BUDGET_INVALID, "budget 参数非法");
-        }
-        IntentFilter.Verdict verdict = intentFilter.classify(req.query());     // P3/P4
-        if (verdict.verdict() == Contracts.IntentVerdict.ATTACK) {
-            budget.recordReject(req.sessionId());
-            return Contracts.GateResult.reject(Contracts.Status.REJECTED,
-                    Contracts.ReasonCode.ATTACK_INTENT, "本系统仅用于学习用途的结构分析");
-        }
-        StringBuilder denyReason = new StringBuilder();
-        if (!budget.allow(req.sessionId(), req.budget(), denyReason)) {        // P6
+        String traceId = "pg_" + UUID.randomUUID().toString().substring(0, 8);
+        String query = req.query() == null ? "" : req.query();
+
+        // P6 会话冻结检查（冻结后除白名单错误外的一切请求直接拒绝）
+        if (sessions.isFrozen(req.sessionId())) {
+            sessions.audit(req.sessionId(), query, Contracts.Status.REJECTED,
+                    Contracts.ReasonCode.SESSION_FROZEN, traceId);
             return Contracts.GateResult.reject(Contracts.Status.REJECTED,
                     Contracts.ReasonCode.SESSION_FROZEN, "会话已冻结（多次边界违规）");
         }
-        // TODO：verdict.audit()==true 时写审计日志（audit 表，append-only）
+        // P1 白名单（规范化后精确匹配，防 T3 变体绕过）
+        var target = whitelist.find(req.targetId());
+        if (target.isEmpty()) {
+            sessions.recordReject(req.sessionId(), query, Contracts.Status.REJECTED,
+                    Contracts.ReasonCode.UNAUTHORIZED_TARGET, traceId);
+            return Contracts.GateResult.reject(Contracts.Status.REJECTED,
+                    Contracts.ReasonCode.UNAUTHORIZED_TARGET, "目标未在授权学习白名单内");
+        }
+        // P2 授权声明（注册时已强制，请求级再校验一次防伪造）
+        if (!req.authorizationAck()) {
+            sessions.recordReject(req.sessionId(), query, Contracts.Status.REJECTED,
+                    Contracts.ReasonCode.AUTH_MISSING, traceId);
+            return Contracts.GateResult.reject(Contracts.Status.REJECTED,
+                    Contracts.ReasonCode.AUTH_MISSING, "缺少授权声明");
+        }
+        // P5 预算参数
+        if (req.budget() < Contracts.MIN_BUDGET || req.budget() > Contracts.MAX_BUDGET) {
+            sessions.recordReject(req.sessionId(), query, Contracts.Status.REJECTED,
+                    Contracts.ReasonCode.BUDGET_INVALID, traceId);
+            return Contracts.GateResult.reject(Contracts.Status.REJECTED,
+                    Contracts.ReasonCode.BUDGET_INVALID, "budget 参数非法（1-100）");
+        }
+        // P3/P4 意图过滤：L0 硬拦截 / L1 豁免 / UNCLEAR 放行+audit
+        IntentFilter.Verdict verdict = intentFilter.classify(query);
+        if (verdict.verdict() == Contracts.IntentVerdict.ATTACK) {
+            sessions.recordReject(req.sessionId(), query, Contracts.Status.REJECTED,
+                    Contracts.ReasonCode.ATTACK_INTENT, traceId);
+            return Contracts.GateResult.reject(Contracts.Status.REJECTED,
+                    Contracts.ReasonCode.ATTACK_INTENT, "本系统仅用于学习用途的结构分析");
+        }
+        if (verdict.audit()) {
+            sessions.audit(req.sessionId(), query, Contracts.Status.ANALYZING, null, traceId);
+        }
         return Contracts.GateResult.pass();
     }
 }

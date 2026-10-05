@@ -18,18 +18,25 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
-    <!-- TODO Phase 1：SQLite 持久层（索引/会话/拦截日志 append-only）
     <dependency>
       <groupId>org.xerial</groupId>
       <artifactId>sqlite-jdbc</artifactId>
       <version>3.46.1.0</version>
     </dependency>
-    -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
     <plugins>
-      <!-- repackage 带 exec classifier：默认 jar 保持普通可依赖（skill-apk 需要 Contracts），
+      <!-- repackage 带 exec classifier：默认 jar 保持普通可依赖（skill-apk 需要契约），
            可执行 jar 额外产出为 agent-0.2.0-exec.jar -->
       <plugin>
         <groupId>org.springframework.boot</groupId>

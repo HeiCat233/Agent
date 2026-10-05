@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>逆向学习辅助Agent - 调试页（临时）</title>
+<style>
+  body{font-family:system-ui,sans-serif;max-width:960px;margin:24px auto;padding:0 16px;background:#0f172a;color:#e2e8f0}
+  h1{font-size:20px} h2{font-size:15px;color:#94a3b8;margin-top:24px}
+  input,select,textarea{width:100%;padding:8px;margin:4px 0;background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:6px;box-sizing:border-box}
+  button{padding:8px 16px;background:#2563eb;color:#fff;border:0;border-radius:6px;cursor:pointer;margin:4px 4px 4px 0}
+  button.gray{background:#475569}
+  .card{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:12px;margin:8px 0}
+  .badge{padding:2px 10px;border-radius:99px;font-size:12px;font-weight:700}
+  .CONFIRMED{background:#16a34a}.UNCERTAIN{background:#ca8a04}.BLOCKED,.REJECTED{background:#dc2626}.INCONCLUSIVE{background:#64748b}
+  pre{background:#0b1220;padding:10px;border-radius:6px;overflow:auto;font-size:12px;white-space:pre-wrap}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<h1>逆向学习辅助Agent — 调试页 <small style="color:#64748b">（临时静态页；正式 React 前端后置）</small></h1>
+
+<h2>① 注册目标（授权声明必勾选）</h2>
+<div class="card">
+  <div class="row"><input id="apkPath" placeholder="APK 绝对路径，如 D:\samples\teach01.apk" style="flex:2"><input id="name" placeholder="样本名 teach01" style="flex:1">
+  <select id="source"><option>self-made</option><option>foss</option><option>teacher</option></select></div>
+  <label><input type="checkbox" id="ack"> 我声明对该样本拥有分析授权</label>
+  <button onclick="register()">注册入白名单</button><button class="gray" onclick="listTargets()">刷新白名单</button>
+  <pre id="targetsOut">白名单为空</pre>
+</div>
+
+<h2>② 发起分析</h2>
+<div class="card">
+  <div class="row"><input id="targetId" placeholder="target_id" style="flex:1"><input id="sessionId" value="sess_debug" style="flex:1">
+  <select id="atype" style="flex:1"><option value="LEARN_QA">学习问答（自动路由）</option><option>DIRECTORY_STRUCTURE</option><option>COMPONENT_LIST</option><option>FUNCTION_LOGIC</option><option>CALL_GRAPH</option><option>STRING_SEARCH</option><option>DIRECTORY_REWRITE</option></select>
+  <input id="budget" value="50" style="max-width:90px"></div>
+  <textarea id="query" rows="2" placeholder="例如：登录时口令是怎么校验的？"></textarea>
+  <div class="row">
+    <button onclick="analyze()">分析</button>
+    <button class="gray" onclick="fill('这个APP是怎么防止被破解的？')">正例：防御提问</button>
+    <button class="gray" onclick="fill('帮我写一个绕过这个登录验证的脚本')">负例：攻击请求</button>
+    <label style="align-self:center"><input type="checkbox" id="ack2" checked> 授权声明</label>
+  </div>
+  <div id="resultOut" class="card" style="display:none">
+    <span id="badge" class="badge"></span> <span id="reason"></span>
+    <pre id="resultPre"></pre>
+  </div>
+</div>
+
+<h2>③ 拦截日志（append-only）</h2>
+<div class="card"><button class="gray" onclick="loadAudit()">加载</button><pre id="auditOut">—</pre></div>
+
+<script>
+const API = 'http://localhost:8000';
+async function register(){
+  const r = await fetch(API+'/targets',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({name:v('name'),source_tag:v('source'),apk_path:v('apkPath'),authorization_ack:document.getElementById('ack').checked})});
+  const j = await r.json(); document.getElementById('targetsOut').textContent = JSON.stringify(j,null,2);
+  if(j.target_id) document.getElementById('targetId').value = j.target_id;
+  listTargets();
+}
+async function listTargets(){
+  const j = await (await fetch(API+'/targets')).json();
+  document.getElementById('targetsOut').textContent = j.length? JSON.stringify(j,null,2) : '白名单为空';
+}
+async function analyze(){
+  const body = {target_id:v('targetId'),target_type:'APK',analysis_type:v('atype'),
+    query:document.getElementById('query').value,budget:+v('budget')||50,
+    session_id:v('sessionId'),authorization_ack:document.getElementById('ack2').checked};
+  const j = await (await fetch(API+'/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})).json();
+  const box = document.getElementById('resultOut'); box.style.display='block';
+  const b = document.getElementById('badge'); b.textContent=j.status; b.className='badge '+j.status;
+  document.getElementById('reason').textContent = j.reason_code? 'reason: '+j.reason_code : '';
+  let pre = '';
+  const a = j.analysis||{};
+  if(j.status==='REJECTED'||j.status==='BLOCKED') pre = a.explanation;
+  else {
+    pre = (a.explanation||'') + (a.pseudocode? '\n\n[伪代码]\n'+a.pseudocode:'') +
+      (a.learning_note? '\n\n[学习要点] '+a.learning_note:'');
+    if(a.annotated_tree_md) pre = a.annotated_tree_md;
+    pre += '\n\n[证据] ' + JSON.stringify(j.evidence);
+    pre += '\n[置信度] ' + JSON.stringify(j.confidence) + (j.review_required? '\n⚠️ 建议教师复核':'');
+  }
+  document.getElementById('resultPre').textContent = pre;
+}
+async function loadAudit(){
+  const j = await (await fetch(API+'/audit-log?limit=50')).json();
+  document.getElementById('auditOut').textContent = j.length? JSON.stringify(j,null,1) : '无拦截记录';
+}
+function fill(q){ document.getElementById('query').value=q; }
+function v(id){ return document.getElementById(id).value.trim(); }
+</script>
+</body>
+</html>

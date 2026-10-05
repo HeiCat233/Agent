@@ -4,77 +4,52 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 共享契约与枚举 —— 全系统唯一权威（与 design/ADR-004 严格一致）。
- *
+ * 共享契约 —— 全系统唯一权威（design/ADR-004）。
  * 修改本文件 = 修改两组共享契约，必须经 B组评审（review/peer_review.md）并走 O5 流程。
- * 状态机与 reason_code 判别标准见 ADR-004；置信度规则见方案 4.7 节。
- * 语言无关：B组（小程序方向）按本契约的 JSON/状态机自行实现（ADR-006）。
  */
 public final class Contracts {
     private Contracts() {}
 
-    // ===== 置信度与预算常量（变更走 O5 流程，见 status_and_permissions.md）=====
+    // ===== 常量（变更走 O5 流程，见 status_and_permissions.md）=====
     public static final double CONFIRMED_THRESHOLD = 0.75;
     public static final double UNCERTAIN_THRESHOLD = 0.40;
     public static final int DEFAULT_BUDGET = 50;
     public static final int MIN_BUDGET = 1;
     public static final int MAX_BUDGET = 100;
-    public static final int SESSION_REJECT_LIMIT = 2;   // P6：同 session 被拒 >=2 次冻结
+    public static final int SESSION_REJECT_LIMIT = 2;
+    public static final int MAX_FRAGMENT_LINES = 200;
+    public static final int MAX_CANDIDATES = 5;
 
-    /** ADR-006：APK=A组实现分析器，MINIPROGRAM=B组实现分析器（同一接口）。 */
     public enum TargetType { APK, MINIPROGRAM }
 
     public enum AnalysisType {
-        DIRECTORY_STRUCTURE,   // FR-02
-        COMPONENT_LIST,        // FR-03
-        FUNCTION_LOGIC,        // FR-04
-        CALL_GRAPH,            // FR-05
-        STRING_SEARCH,         // FR-06
-        DIRECTORY_REWRITE,     // FR-09 目录注释重写（ADR-005）
-        LEARN_QA               // FR-07 学习问答（路由到上述类型）
+        DIRECTORY_STRUCTURE, COMPONENT_LIST, FUNCTION_LOGIC,
+        CALL_GRAPH, STRING_SEARCH, DIRECTORY_REWRITE, LEARN_QA
     }
 
-    /**
-     * 状态机（ADR-004）：REJECTED=入口拒绝(分析未发生)；BLOCKED=出口拦截(分析已发生)；
-     * UNCERTAIN=完成但诚实不确定(必须透传给用户)；INCONCLUSIVE=预算耗尽未完成。
-     */
-    public enum Status {
-        REQUESTED, REJECTED, ANALYZING, CONFIRMED, UNCERTAIN, BLOCKED, INCONCLUSIVE
-    }
+    /** 状态机（ADR-004）：REJECTED=入口拒绝(分析未发生)；BLOCKED=出口拦截(分析已发生)；
+     *  UNCERTAIN=完成但诚实不确定(必须透传)；INCONCLUSIVE=预算耗尽。 */
+    public enum Status { REQUESTED, REJECTED, ANALYZING, CONFIRMED, UNCERTAIN, BLOCKED, INCONCLUSIVE }
 
     public enum ReasonCode {
-        UNAUTHORIZED_TARGET,   // PreGate 目标不在白名单
-        AUTH_MISSING,          // PreGate 未携带授权声明
-        ATTACK_INTENT,         // PreGate L0 命中攻击请求
-        SESSION_FROZEN,        // PreGate 会话累积被拒冻结
-        BUDGET_INVALID,        // PreGate budget 参数非法
-        PAYLOAD_DETECTED,      // PostGate 输出含可运行攻击内容
-        BYPASS_CONTENT,        // PostGate 输出含绕过指令(段落删除)
-        EVIDENCE_FAILED,       // PostGate 引用回验失实 -> UNCERTAIN
-        BUDGET_EXCEEDED,       // Skill 步数耗尽 -> INCONCLUSIVE
-        TOOL_FAILURE,          // Skill 工具/LLM 失败 -> UNCERTAIN
-        NO_CANDIDATE           // Skill 定位无候选 -> UNCERTAIN
+        UNAUTHORIZED_TARGET, AUTH_MISSING, ATTACK_INTENT, SESSION_FROZEN, BUDGET_INVALID,
+        PAYLOAD_DETECTED, BYPASS_CONTENT, EVIDENCE_FAILED,
+        BUDGET_EXCEEDED, TOOL_FAILURE, NO_CANDIDATE
     }
 
     public enum IntentVerdict { LEARNING, ATTACK, UNCLEAR }
 
-    // ===== 数据契约（JSON 形态见方案第六章）=====
+    // ===== 数据契约 =====
 
     public record AnalysisRequest(
-            String targetId,          // 白名单内目标 ID（SHA-256 前12位）
-            TargetType targetType,
-            AnalysisType analysisType,
-            String query,
-            int budget,               // [1,100]，默认 50；单位=工具+LLM 调用次数
-            String sessionId,
-            boolean authorizationAck) {}
+            String targetId, TargetType targetType, AnalysisType analysisType,
+            String query, int budget, String sessionId, boolean authorizationAck) {}
 
-    public record Reference(String file, String lines) {}   // lines 例："120-168"（含端点）
+    public record Reference(String file, String lines) {}
 
-    /** Stage 4 提取的 smali 片段，是 Stage 6 / PostGate Q2 回验的比对基准。 */
+    /** Stage 4 提取片段：Stage 6 / PostGate Q2 回验的比对基准。 */
     public record Fragment(String file, int lineStart, int lineEnd, String content) {}
 
-    /** 置信度四项分解（规则计算，禁止 LLM 自报，方案 4.7）。 */
     public record ConfidenceBreakdown(double decompile, double evidence,
                                       double clarity, double obfuscation) {
         public double value() {
@@ -83,19 +58,26 @@ public final class Contracts {
         }
     }
 
-    /** Skill 输出（可变：PostGate 会降级/标注，故不用 record）。 */
+    /** Skill 输出（可变：PostGate 会降级/删段/标注，故不用 record）。 */
     public static final class SkillOutput {
         private Status status;
         private ReasonCode reasonCode;
+        private String analysisType;        // 实际执行的 AnalysisType.name()
+        private String target;              // 方法/类/包标识
+        private String explanation;
+        private String pseudocode;
+        private String learningNote;
+        private String annotatedTreeMd;     // FR-09：注释树 Markdown（DIRECTORY_REWRITE）
+        private boolean injectionSuspected;
         private final List<Reference> evidence = new ArrayList<>();
         private ConfidenceBreakdown confidence;
         private boolean reviewRequired;
-        private boolean injectionSuspected;
         private String traceId = "";
+        private int stepsUsed;              // 本次分析消耗的步数（P5 预算核算，单位=工具+LLM调用）
 
         public SkillOutput(Status status) { this.status = status; }
 
-        /** PostGate Q2：引用回验失实 -> 降级为 UNCERTAIN（ADR-004）。 */
+        /** PostGate Q2 / Stage 6：证据失实 -> 降级 UNCERTAIN（ADR-004）。 */
         public void downgrade(Status newStatus, ReasonCode reason) {
             this.status = newStatus;
             this.reasonCode = reason;
@@ -103,16 +85,33 @@ public final class Contracts {
         }
 
         public Status getStatus() { return status; }
+        public void setStatus(Status s) { this.status = s; }
         public ReasonCode getReasonCode() { return reasonCode; }
+        public void setReasonCode(ReasonCode r) { this.reasonCode = r; }
+        public String getAnalysisType() { return analysisType; }
+        public void setAnalysisType(String t) { this.analysisType = t; }
+        public String getTarget() { return target; }
+        public void setTarget(String t) { this.target = t; }
+        public String getExplanation() { return explanation; }
+        public void setExplanation(String e) { this.explanation = e; }
+        public String getPseudocode() { return pseudocode; }
+        public void setPseudocode(String p) { this.pseudocode = p; }
+        public String getLearningNote() { return learningNote; }
+        public void setLearningNote(String n) { this.learningNote = n; }
+        public String getAnnotatedTreeMd() { return annotatedTreeMd; }
+        public void setAnnotatedTreeMd(String md) { this.annotatedTreeMd = md; }
+        public boolean isInjectionSuspected() { return injectionSuspected; }
+        public void setInjectionSuspected(boolean v) { this.injectionSuspected = v; }
         public List<Reference> getEvidence() { return evidence; }
+        public void addReference(Reference r) { evidence.add(r); }
         public ConfidenceBreakdown getConfidence() { return confidence; }
         public void setConfidence(ConfidenceBreakdown c) { this.confidence = c; }
         public boolean isReviewRequired() { return reviewRequired; }
         public void setReviewRequired(boolean v) { this.reviewRequired = v; }
-        public boolean isInjectionSuspected() { return injectionSuspected; }
-        public void setInjectionSuspected(boolean v) { this.injectionSuspected = v; }
         public String getTraceId() { return traceId; }
         public void setTraceId(String t) { this.traceId = t; }
+        public int getStepsUsed() { return stepsUsed; }
+        public void setStepsUsed(int s) { this.stepsUsed = s; }
     }
 
     public record GateResult(boolean passed, Status status, ReasonCode reasonCode,
@@ -124,10 +123,10 @@ public final class Contracts {
         }
     }
 
-    /** 可插拔分析 Skill 接口（ADR-006）：skill-apk 与 B组分析器均实现本接口；
-     *  共享核心不 import 任何分析器内部细节。 */
+    /** 可插拔分析 Skill 接口（ADR-006/010）：A/B 两组分析器均实现本接口。 */
     public interface SkillContract {
         TargetType targetType();
+        /** 预算单位=工具+LLM 调用次数；预算耗尽 -> INCONCLUSIVE/BUDGET_EXCEEDED。 */
         SkillOutput analyze(AnalysisRequest req, int budgetLeft);
     }
 }
