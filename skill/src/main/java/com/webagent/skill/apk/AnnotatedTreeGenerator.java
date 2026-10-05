@@ -52,7 +52,7 @@ public class AnnotatedTreeGenerator {
         Map<String, List<String>> pkgClasses = new LinkedHashMap<>();
         try (Connection c = indexer.open(indexDb);
              var st = c.createStatement();
-             var rs = st.executeQuery("SELECT class_name, smali_file FROM classes ORDER BY class_name")) {
+             var rs = st.executeQuery("SELECT name, smali_file FROM classes ORDER BY name")) {
             while (rs.next()) {
                 String cls = rs.getString(1);
                 String pkg = pkgOf(cls);
@@ -137,7 +137,8 @@ public class AnnotatedTreeGenerator {
     }
 
     private static String pkgOf(String cls) {
-        int i = cls.lastIndexOf('/');
+        // 索引类名为点分形式（com.example.foo.Bar）：包 = 最后一个 '.' 之前
+        int i = cls.lastIndexOf('.');
         return i <= 0 ? cls : cls.substring(0, i + 1);
     }
 

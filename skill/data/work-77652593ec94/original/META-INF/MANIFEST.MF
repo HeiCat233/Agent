@@ -1,0 +1,49 @@
+Manifest-Version: 1.0
+Built-By: Generated-by-ADT
+Created-By: Android Gradle 2.3.1
+
+Name: res/mipmap-mdpi-v4/ic_launcher.png
+SHA-256-Digest: N/dER7xL8qmP74ftPgYgyhuQ0i3Ncws0v6iPev0bb+w=
+
+Name: res/mipmap-xhdpi-v4/ic_launcher_round.png
+SHA-256-Digest: fLzJrZnlwezh7uIdxQJk2Udc9vtLRQviNZpPXJrdF/s=
+
+Name: AndroidManifest.xml
+SHA-256-Digest: t5+EYTvgppyfy8BkJCjO3BVCoxeI7rUnllYSB1eb7R0=
+
+Name: res/drawable/ic_arrow_drop_down_black_24dp.xml
+SHA-256-Digest: /bfpbYpT7vYSUvHod7/q5wWA+v3TKwSgmYPz4DAg9kg=
+
+Name: res/drawable/ic_android_black_24dp.xml
+SHA-256-Digest: 2p51uXllfnSictAyfx1ikBVcSvz4q0iqLHPuVRA9PYg=
+
+Name: res/mipmap-mdpi-v4/ic_launcher_round.png
+SHA-256-Digest: KgADuXyzf7/Nedd3wg/2v+IpeiOgrZIbHp+tS7HclA8=
+
+Name: res/mipmap-xhdpi-v4/ic_launcher.png
+SHA-256-Digest: 0sV+9EypI3S3bJJJQJfo66nLewOVwC6M4qPIyrpRwXo=
+
+Name: res/mipmap-hdpi-v4/ic_launcher.png
+SHA-256-Digest: Q4TZ5OXV6ySqLOSNIdSGZZ0xT97LZavZpsLuSphwKF0=
+
+Name: res/mipmap-xxxhdpi-v4/ic_launcher.png
+SHA-256-Digest: qcolc1AOgHluvdUwHG10fmN5ltEw+mjNrvHNn+iwsXA=
+
+Name: res/mipmap-xxhdpi-v4/ic_launcher_round.png
+SHA-256-Digest: swjaYwqOjx/z4AgtjfsT+mEnMwHT4ohOJUzS8KClpOQ=
+
+Name: res/mipmap-hdpi-v4/ic_launcher_round.png
+SHA-256-Digest: QSA2Ehw64TpzY8i8kOzVCO4GCgZtS6VC7bz6Fzt1z1w=
+
+Name: resources.arsc
+SHA-256-Digest: TjRR3Yu/5+l97jRF3eJA/FJA2T5mF9BkZZHh5LJbFV8=
+
+Name: classes.dex
+SHA-256-Digest: V2Sii0rLFj6o4s0qozWuYio+fDEvXOEeoUpLHBwKR8o=
+
+Name: res/mipmap-xxxhdpi-v4/ic_launcher_round.png
+SHA-256-Digest: PuAwmkSrmnCbBQ3HBbQMRWDjk9EIUvKkwoFZUOhoQnY=
+
+Name: res/mipmap-xxhdpi-v4/ic_launcher.png
+SHA-256-Digest: 066Qkoe9BdpXZpT99qIIGymPCbqsULWw1ZEIMkSpzrw=
+
