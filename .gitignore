@@ -1,0 +1,41 @@
+# ==== 机密与本地配置（绝不入库）====
+application-local.yml
+*.local.yml
+.env
+
+# ==== 内部协作文件（供团队自用，不作为交付物提交）====
+工作日志.md
+
+# ==== Java / Maven ====
+target/
+*.class
+.mvn/wrapper/maven-wrapper.jar
+
+# ==== Python（历史骨架，ADR-008 切换 Java）====
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# ==== Node / 前端 ====
+node_modules/
+dist/
+build/
+
+# ==== 运行时数据（索引/会话/拦截日志，评测时另见 evidence/ 归档）====
+agent/data/
+
+# ==== apktool 工作目录与样本 APK 二进制（样本源码工程入库，APK 本体不入）====
+skill/workdir/
+samples/**/*.apk
+
+# ==== 本地模型文件（模型经 OLLAMA_MODELS 存放于 D:\ollama\models，不入库）====
+models/
+*.gguf
+
+# ==== IDE / 工具 ====
+.idea/
+.vscode/
+.zcode/
+.DS_Store
+Thumbs.db
