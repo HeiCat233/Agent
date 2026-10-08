@@ -2,18 +2,19 @@
 
 > 目标：**他人在干净环境**按本文档从零跑通系统。执行人=B组（互审），
 > 结果记入 recovery_test.md 并在 review/signoff.md 签字。
-> `EXAMPLE` 标记处随实现推进补充真实命令。
+> 本文档描述的依赖版本均为 **已实测可用版本**；标 `待装` 的项按说明补齐即可。
 
 ## 1. 前置依赖
 
-| 依赖 | 版本 | 用途 |
-|:--|:--|:--|
-| JDK | EXAMPLE 17（与 apktool 统一） | 后端（ADR-008；本机 2026-10-03 实测未安装） |
-| Maven | EXAMPLE 3.9+（或 IDEA 内置） | 构建 |
-| Ollama | 已装 0.34.4 | 本地 LLM |
-| Docker | EXAMPLE 24+ | apktool 沙箱（ADR-007：仅隔离不可信面） |
-| apktool | EXAMPLE 2.9.3 | 解码（容器内） |
-| Node.js | EXAMPLE 20+ | 前端构建 |
+| 依赖 | 版本 | 必需性 | 用途 |
+|:--|:--|:--|:--|
+| JDK | 17（与 apktool 统一） | **必需** | 后端（ADR-008） |
+| Maven | 3.9+（或 IDEA 内置） | **必需** | 构建 |
+| apktool | 2.9.3 | Stage 1 解码需要 | 解码 APK（开发期宿主机直调） |
+| GLM API key | — | 调试默认通道需要 | 云端 LLM（ADR-009，见第 2.0 节） |
+| Ollama | 0.34+ | 可选（正式/离线） | 本地 LLM |
+| Node.js | 20+ | 可选（React 前端） | 前端构建；当前调试页无需 Node |
+| Docker | 24+ | 可选（正式期） | apktool 沙箱（ADR-007：仅隔离不可信面） |
 
 > **部署形态（ADR-007）**：宿主机运行可信面（Spring Boot 后端 + Ollama，仅监听本机）；
 > Docker 只隔离不可信面（apktool）。**不使用完整虚拟机，模型不进 VM**——详见 design/ADR-007。
@@ -57,11 +58,13 @@ ollama pull qwen2.5-coder:7b    # 本机（8GB显存）正式通道，约4.7G，
 
 ## 3. 本机启动（已验证路径，2026-10-05）
 
-环境（绿色版，位于 D:\dev，不占 C 盘）：JDK 17.0.2、Maven 3.9.9、apktool（待装，见下）。
+环境（绿色版，位于 D:\dev，不占 C 盘）：JDK 17.0.2、Maven 3.9.9（均已在组长机实测通过），
+apktool 2.9.3（`D:\dev\apktool\apktool.jar`）。**组员机器路径不同时**，改 `env.bat` 顶部
+三个默认值，或先 `set JAVA_HOME=...` 再 `call env.bat`（`env.bat` 已支持被覆盖）。
 
 ```bat
 :: ① 打开 cmd，执行环境脚本（或手动 set JAVA_HOME/PATH）
-D:\develop\git\webAgent\env.bat
+call D:\develop\git\webAgent\env.bat
 
 :: ② 构建（首次约几分钟，依赖仓库在 D:\dev\m2）
 mvn install -DskipTests -Dmaven.repo.local=D:\dev\m2

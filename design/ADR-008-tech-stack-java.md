@@ -32,8 +32,9 @@ reason_code、Skill 契约（JSON Schema）、6 阶段管线、置信度公式�
 2. 新 Maven 多模块骨架：根 pom（parent）+ `agent/`（Spring Boot 主工程：契约/双关卡/
    路由）+ `skill/`（skill-apk 模块：六阶段管线骨架）——目录名与文档映射保持一致；
 3. ADR-001/005 中的 Python 代码骨架保留但加标注"示意伪代码，实现语言=Java（ADR-008）"；
-4. RUNNING.md 前置依赖改为 JDK 17 + Maven（本机实测 2026-10-03：两者均未安装，
-   组员可用 IDEA 内置 Maven）；契约/验收/评测文档无语言绑定，不需要改。
+4. RUNNING.md 前置依赖改为 JDK 17 + Maven（2026-10-05 组长机已装绿色版并实测通过：
+   JDK 17.0.2 / Maven 3.9.9 位于 `D:\dev`，用 `env.bat` 注入；组员也可用 IDEA 内置 Maven）；
+   契约/验收/评测文档无语言绑定，不需要改。
 
 ## 后果
 
@@ -41,4 +42,4 @@ reason_code、Skill 契约（JSON Schema）、6 阶段管线、置信度公式�
   加鉴权/持久层；
 - 负面：启动配置比 FastAPI 略重；LLM 相关教程多以 Python 为主（本设计只需 HTTP
   直连 Ollama，影响可控）；
-- 本机待办：安装 JDK 17 与 Maven（或使用 IDEA 内置）。
+- 环境状态：JDK 17 与 Maven 已在组长机就绪（`env.bat`）；组员按《组员上手指南.md》自行安装。

@@ -19,10 +19,10 @@
 | evidence/ | O3 证据：版本清单 + run 归档模板 + 失败案例 + 不确定清单 |
 | release/ | O6 交接：RUNNING 启动说明 + 版本 + reset.sh + 恢复测试 |
 | review/ | O1/O4/O5/O7 + 互审 + 签署（运行后填真实记录，EXAMPLE 行需替换） |
-| agent/ | 共享核心代码骨架：contracts（契约+状态机）/ pregate / postgate / router |
-| skill/ | A组差异化实现：APK 分析 Skill（6阶段管线 + 目录注释重写）骨架 |
-| skill_miniprogram/ | B组占位：接口说明与实现指引 |
-| web/ | 前端四模块结构与 API 约定 |
+| agent/ | 共享核心实现：contracts（契约+状态机）/ pregate / postgate / router / llm / REST API |
+| skill/ | A组差异化实现：APK 分析 Skill（6阶段管线 + 目录注释重写），已跑通真实 APK |
+| skill_miniprogram/ | B组：技术方案 + skill.json 声明示例 + 实现指引 |
+| web/ | 前端四模块结构与 API 约定（当前为静态调试页，React 版待做） |
 
 ## O1-O7 能力 ↔ 交付物映射
 
@@ -36,10 +36,14 @@
 | O6 交接与恢复 | release/（RUNNING/reset.sh/recovery_test） |
 | O7 风险与个人 | review/risk_table.md + personal_statement.md |
 
-## 当前状态（2026-09-30）
+## 当前状态（2026-10-08）
 
-- ✅ 方案 v2.0 与项目骨架就绪（文档/模板/代码骨架）
-- ⬜ 待办：负责人拍板模型选型（design/ADR-003 选择记录）→ 按 实施路线图.md Phase 0 开始
+- ✅ 方案 v2.0 + 选型总览 + 组员上手指南 + 10 篇 ADR + 课程交付模板全部就绪
+- ✅ 后端全链路可运行：双关卡（PreGate/PostGate）、三级意图过滤、声明式 Skill 路由、
+  LLM 三通道（mock/cloud-glm/local-ollama）、APK 六阶段管线、目录注释重写（FR-09）、REST API
+- ✅ 24 个单元/集成测试全绿；已用真实 APK 跑通 Stage1-6 冒烟
+- ✅ B组方案（skill_miniprogram/技术方案.md + skill.json 声明示例）已就绪
+- ⬜ 待办（组员接手）：GLM 真通道联调 / React 前端 / Docker 沙箱 / Phase 2 教学样本 APK / 评测记录
 - ⚠️ 提醒：所有模板中的 EXAMPLE 行须在交付前替换为真实记录；空模板不扣分，编造数据是红线
 
 ## 边界声明
