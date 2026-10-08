@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<vector android:height="@null" android:width="@null" android:viewportWidth="82.0" android:viewportHeight="122.0"
-  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt">
-    <path android:name="sony_clock_2_hour_digit" android:pathData="M41.39,5.64C20.81,5.64,5.29,21.1,5.29,61c0,39,15.4,55,36.1,55,19.94,0,35.37-16.3,35.37-55,0-39.9-15.43-55.36-35.37-55.36" android:strokeColor="@null" android:strokeWidth="4.17" android:trimPathStart="0.0" android:trimPathEnd="1.0" android:trimPathOffset="0.0" android:strokeMiterLimit="10.0" />
-    <group android:name="sony_clock_2_hour_dot">
-        <path android:fillColor="@null" android:pathData="M 0 -5 C 2.76142374915 -5 5 -2.76142374915 5 0 C 5 2.76142374915 2.76142374915 5 0 5 C -2.76142374915 5 -5 2.76142374915 -5 0 C -5 -2.76142374915 -2.76142374915 -5 0 -5 Z" />
-    </group>
-</vector>

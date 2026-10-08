@@ -1,9 +1,18 @@
 @echo off
-REM 逆向学习辅助Agent - 本机环境变量（绿色版，不污染系统）
-REM 用法：在运行 mvn / java 前执行一次本脚本，或双击后继续操作
-set JAVA_HOME=D:\dev\jdk-17.0.2
-set PATH=%JAVA_HOME%\bin;D:\dev\apache-maven-3.9.9\bin;%PATH%
-set ZHIPUAI_API_KEY=
+REM Reverse Learning Agent - local toolchain environment (portable, does not touch system settings).
+REM Usage: run this once in cmd before mvn/java, e.g.  call env.bat
+REM NOTE: keep this file pure ASCII; cmd.exe reads .bat as the OEM codepage (GBK on zh-CN)
+REM       and non-ASCII comments corrupt the parsed commands.
+
+REM Override the defaults below via environment variables on machines that differ.
+if not defined JAVA_HOME      set JAVA_HOME=D:\dev\jdk-17.0.2
+if not defined MAVEN_HOME     set MAVEN_HOME=D:\dev\apache-maven-3.9.9
+if not defined MAVEN_REPO     set MAVEN_REPO=D:\dev\m2
+
+set PATH=%JAVA_HOME%\bin;%MAVEN_HOME%\bin;%PATH%
+
+REM ZHIPUAI_API_KEY: set it yourself (setx ZHIPUAI_API_KEY "your-key"); never commit it.
 echo [env] JAVA_HOME=%JAVA_HOME%
-echo [env] Maven / JDK 已就绪（ZHIPUAI_API_KEY 当前为空，走 GLM 通道前请设置）
-cd /d D:\develop\git\webAgent
+echo [env] MAVEN_HOME=%MAVEN_HOME%
+echo [env] MAVEN_REPO=%MAVEN_REPO%
+echo [env] JDK/Maven ready. Set ZHIPUAI_API_KEY before using the cloud-glm channel.

@@ -25,7 +25,8 @@ build/
 # ==== 运行时数据（索引/会话/拦截日志，评测时另见 evidence/ 归档）====
 agent/data/
 
-# ==== apktool 工作目录与样本 APK 二进制（样本源码工程入库，APK 本体不入）====
+# ==== apktool 解码工作目录与索引库（运行时产物，可随时重建，不入库）====
+skill/data/
 skill/workdir/
 samples/**/*.apk
 
